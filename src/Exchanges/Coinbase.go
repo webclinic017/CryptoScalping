@@ -34,35 +34,30 @@ func GetCoinbaseOrderBook(currency string, c chan []float64, w *sync.WaitGroup) 
 	var cb CoinbaseBook
 	json.NewDecoder(res.Body).Decode(&cb)
 
-	bid_kappa, ask_kappa := getCoinbaseKappa(cb)
+	best_bid, best_ask, bid_kappa, ask_kappa := getCoinbaseKappa(cb)
 
-	c <- []float64{bid_kappa, ask_kappa}
+	c <- []float64{best_bid, best_ask, bid_kappa, ask_kappa}
 	w.Done()
 
 }
 
-func getCoinbaseKappa(cb CoinbaseBook) (float64, float64) {
+func getCoinbaseKappa(cb CoinbaseBook) (float64, float64, float64, float64) {
 
-	// Return This
-	var bid_kappa float64
-	var ask_kappa float64
+	best_bid := cb.Bids[0][0]
+	bid_kappa := cb.Bids[0][0] * cb.Bids[0][1]
 
-	var bid []float64
-	var bid_size []float64
+	best_ask := cb.Asks[0][0]
+	ask_kappa := cb.Asks[0][0] * cb.Asks[0][1]
 
-	for i := 0; i < len(cb.Bids); i++ {
-		bid = append(bid, cb.Bids[i][0])
-		bid_size = append(bid_size, cb.Bids[i][1])
+	for i := 1; i < len(cb.Bids); i++ {
+		bid_kappa += cb.Bids[i][0] * cb.Bids[i][1]
+		ask_kappa += cb.Asks[i][0] * cb.Asks[i][1]
 	}
 
-	var ask []float64
-	var ask_size []float64
+	// fmt.Println("Coinbase")
+	// fmt.Println("Best Bid: ", best_bid, "Best Ask: ", best_ask)
+	// fmt.Println("Bid: ", bid_kappa, "Ask: ", ask_kappa)
 
-	for i := 0; i < len(cb.Asks); i++ {
-		ask = append(ask, cb.Asks[i][0])
-		ask_size = append(ask_size, cb.Asks[i][1])
-	}
-
-	return bid_kappa, ask_kappa
+	return best_bid, best_ask, bid_kappa, ask_kappa
 
 }

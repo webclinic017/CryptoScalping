@@ -35,20 +35,28 @@ func GetGeminiOrderBook(currency string, c chan []float64, w *sync.WaitGroup) {
 	var gb GeminiBook
 	json.NewDecoder(res.Body).Decode(&gb)
 
-	bid_kappa, ask_kappa := getGeminiKappa(gb, 20)
+	best_bid, best_ask, bid_kappa, ask_kappa := getGeminiKappa(gb, 20)
 
-	c <- []float64{bid_kappa, ask_kappa}
+	c <- []float64{best_bid, best_ask, bid_kappa, ask_kappa}
 	w.Done()
 
 }
 
-func getGeminiKappa(gb GeminiBook, depth int) (float64, float64) {
+func getGeminiKappa(gb GeminiBook, depth int) (float64, float64, float64, float64) {
 
-	// Return This
-	var bid_kappa float64
-	var ask_kappa float64
+	bid_amount, _ := strconv.ParseFloat(gb.Bids[0].Amount, 64)
+	bid_price, _ := strconv.ParseFloat(gb.Bids[0].Price, 64)
 
-	for i := 0; i < depth; i++ {
+	best_bid := bid_price
+	bid_kappa := bid_amount * bid_price
+
+	ask_amount, _ := strconv.ParseFloat(gb.Asks[0].Amount, 64)
+	ask_price, _ := strconv.ParseFloat(gb.Asks[0].Price, 64)
+
+	best_ask := ask_price
+	ask_kappa := ask_amount * ask_price
+
+	for i := 1; i < depth; i++ {
 
 		bid_amount, _ := strconv.ParseFloat(gb.Bids[i].Amount, 64)
 		bid_price, _ := strconv.ParseFloat(gb.Bids[i].Price, 64)
@@ -60,6 +68,10 @@ func getGeminiKappa(gb GeminiBook, depth int) (float64, float64) {
 
 	}
 
-	return bid_kappa, ask_kappa
+	// fmt.Println("Gemini")
+	// fmt.Println("Best Bid: ", best_bid, "Best Ask: ", best_ask)
+	// fmt.Println("Bid: ", bid_kappa, "Ask: ", ask_kappa)
+
+	return best_bid, best_ask, bid_kappa, ask_kappa
 
 }

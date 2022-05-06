@@ -20,3 +20,10 @@ Feature Set
 
     - Parallelism
 
+Supported Exchanges
+
+- Coinbase
+- Crypto
+- FTX US
+- Kraken 
+- Gemini

@@ -7,10 +7,12 @@ type CoinbaseBook struct {
 }
 
 type KrakenBook struct {
-	Error  []interface{} `json:"error"`
+	Error  []string `json:"error"`
 	Result struct {
-		Asks [][]float64 `json:"asks"`
-		Bids [][]float64 `json:"bids"`
+		Data struct {
+			Asks [][]float64 `json:"asks"`
+			Bids [][]float64 `json:"bids"`
+		} `json:"Data"`
 	} `json:"result"`
 }
 
@@ -25,6 +27,16 @@ type GeminiBook struct {
 		Amount    string `json:"amount"`
 		Timestamp string `json:"timestamp"`
 	} `json:"asks"`
+}
+
+type CryptoBook struct {
+	Code   int    `json:"code"`
+	Method string `json:"method"`
+	Result struct {
+		Bids [][]float64 `json:"bids"`
+		Asks [][]float64 `json:"asks"`
+		T    int64       `json:"t"`
+	} `json:"result"`
 }
 
 type FTXBook struct {

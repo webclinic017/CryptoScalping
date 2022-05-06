@@ -48,8 +48,8 @@ func getKrakenKappa(kb KrakenBook, depth int) (float64, float64) {
 	var ask_kappa float64
 
 	for i := 0; i < depth; i++ {
-		bid_kappa += kb.Result.Bids[i][0] * kb.Result.Bids[i][1]
-		ask_kappa += kb.Result.Asks[i][0] * kb.Result.Asks[i][1]
+		bid_kappa += kb.Result.Data.Bids[i][0] * kb.Result.Data.Bids[i][1]
+		ask_kappa += kb.Result.Data.Asks[i][0] * kb.Result.Data.Asks[i][1]
 	}
 
 	return bid_kappa, ask_kappa

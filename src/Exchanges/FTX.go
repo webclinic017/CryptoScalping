@@ -34,24 +34,30 @@ func GetFTXOrderBook(currency string, c chan []float64, w *sync.WaitGroup) {
 	var fb FTXBook
 	json.NewDecoder(res.Body).Decode(&fb)
 
-	bid_kappa, ask_kappa := getFTXKappa(fb, 20)
+	best_bid, best_ask, bid_kappa, ask_kappa := getFTXKappa(fb, 20)
 
-	c <- []float64{bid_kappa, ask_kappa}
+	c <- []float64{best_bid, best_ask, bid_kappa, ask_kappa}
 	w.Done()
 
 }
 
-func getFTXKappa(fb FTXBook, depth int) (float64, float64) {
+func getFTXKappa(fb FTXBook, depth int) (float64, float64, float64, float64) {
 
-	// Return This
-	var bid_kappa float64
-	var ask_kappa float64
+	best_bid := fb.Result.Bids[0][0]
+	bid_kappa := fb.Result.Bids[0][0] * fb.Result.Bids[0][1]
 
-	for i := 0; i < depth; i++ {
+	best_ask := fb.Result.Asks[0][0]
+	ask_kappa := fb.Result.Asks[0][0] * fb.Result.Asks[0][1]
+
+	for i := 1; i < depth; i++ {
 		bid_kappa += fb.Result.Bids[i][0] * fb.Result.Bids[i][1]
 		ask_kappa += fb.Result.Asks[i][0] * fb.Result.Asks[i][1]
 	}
 
-	return bid_kappa, ask_kappa
+	// fmt.Println("FTX US")
+	// fmt.Println("Best Bid: ", best_bid, "Best Ask: ", best_ask)
+	// fmt.Println("Bid: ", bid_kappa, "Ask: ", ask_kappa)
+
+	return best_bid, best_ask, bid_kappa, ask_kappa
 
 }
