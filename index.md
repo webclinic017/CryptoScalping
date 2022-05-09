@@ -1,37 +1,44 @@
-## Welcome to GitHub Pages
+## Welcome Crypto Scalping
 
-You can use the [editor on GitHub](https://github.com/victorsemeraro/CryptoScalping/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+- Open source project dedicated to delivering high quality alpha
+- Advanced, high performance algorithmic trading infrastructure
+- Sponsored by Vicarisi Ventures, a quantitative development company
+- To learn more, visit https://vicarisi.com/
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+### Getting Started
 
-### Markdown
+The general steps are as followed:
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+1. Initialize Client
 
 ```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+Insert Go code here
 ```
 
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
+## General Features
 
-### Jekyll Themes
+### Order Book Scalping
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/victorsemeraro/CryptoScalping/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+```markdown
+Insert Go code here
+```
 
-### Support or Contact
+## Advanced Features
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+### Avellaneda Stoikov
+
+```markdown
+Insert Go code here
+```
+
+### Monte Carlo Simulation
+
+```markdown
+Insert Go code here
+```
+
+### Statistical Arbitrage
+
+```markdown
+Insert Go code here
+```
