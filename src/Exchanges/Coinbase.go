@@ -1,9 +1,12 @@
 package Exchanges
 
 import (
+	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"sync"
 )
 
@@ -13,7 +16,7 @@ func GetCoinbaseOrderBook(currency string, c chan []float64, w *sync.WaitGroup) 
 		Method Returns the Coinbase Order Book
 	*/
 
-	url := "https://api.exchange.coinbase.com/products/" + currency + "/book?level=2"
+	url := "https://api.exchange.coinbase.com/products/" + currency + "/book?level=1"
 
 	req, err := http.NewRequest("GET", url, nil)
 
@@ -31,8 +34,10 @@ func GetCoinbaseOrderBook(currency string, c chan []float64, w *sync.WaitGroup) 
 
 	defer res.Body.Close()
 
+	body, _ := ioutil.ReadAll(res.Body)
+
 	var cb CoinbaseBook
-	json.NewDecoder(res.Body).Decode(&cb)
+	json.NewDecoder(bytes.NewReader(body)).Decode(&cb)
 
 	best_bid, best_ask, bid_kappa, ask_kappa := getCoinbaseKappa(cb)
 
@@ -43,15 +48,23 @@ func GetCoinbaseOrderBook(currency string, c chan []float64, w *sync.WaitGroup) 
 
 func getCoinbaseKappa(cb CoinbaseBook) (float64, float64, float64, float64) {
 
-	best_bid := cb.Bids[0][0]
-	bid_kappa := cb.Bids[0][0] * cb.Bids[0][1]
+	best_bid, _ := strconv.ParseFloat(cb.Bids[0][0].(string), 64)
+	bid_amount, _ := strconv.ParseFloat(cb.Bids[0][1].(string), 64)
+	bid_kappa := best_bid * bid_amount
 
-	best_ask := cb.Asks[0][0]
-	ask_kappa := cb.Asks[0][0] * cb.Asks[0][1]
+	best_ask, _ := strconv.ParseFloat(cb.Asks[0][0].(string), 64)
+	ask_amount, _ := strconv.ParseFloat(cb.Asks[0][1].(string), 64)
+	ask_kappa := best_ask * ask_amount
 
 	for i := 1; i < len(cb.Bids); i++ {
-		bid_kappa += cb.Bids[i][0] * cb.Bids[i][1]
-		ask_kappa += cb.Asks[i][0] * cb.Asks[i][1]
+
+		bid_amount, _ := strconv.ParseFloat(cb.Bids[i][1].(string), 64)
+		bid_price, _ := strconv.ParseFloat(cb.Bids[i][0].(string), 64)
+		bid_kappa += bid_amount * bid_price
+
+		ask_amount, _ := strconv.ParseFloat(cb.Asks[i][1].(string), 64)
+		ask_price, _ := strconv.ParseFloat(cb.Asks[i][0].(string), 64)
+		ask_kappa += ask_amount * ask_price
 	}
 
 	// fmt.Println("Coinbase")

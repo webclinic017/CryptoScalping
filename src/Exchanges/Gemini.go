@@ -1,7 +1,9 @@
 package Exchanges
 
 import (
+	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -32,8 +34,10 @@ func GetGeminiOrderBook(currency string, c chan []float64, w *sync.WaitGroup) {
 
 	defer res.Body.Close()
 
+	body, _ := ioutil.ReadAll(res.Body)
+
 	var gb GeminiBook
-	json.NewDecoder(res.Body).Decode(&gb)
+	json.NewDecoder(bytes.NewReader(body)).Decode(&gb)
 
 	best_bid, best_ask, bid_kappa, ask_kappa := getGeminiKappa(gb, 20)
 

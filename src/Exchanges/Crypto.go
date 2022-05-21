@@ -1,7 +1,9 @@
 package Exchanges
 
 import (
+	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"sync"
@@ -13,7 +15,9 @@ func GetCryptoOrderBook(currency string, c chan []float64, w *sync.WaitGroup) {
 		Method Returns the Crypto Order Book
 	*/
 
-	url := "https://uat-api.3ona.co/v2/public/get-book?instrument_name=" + currency + "&depth=20"
+	// https: //api.crypto.com/v2/{method}
+	// https://{URL}/v2/public/get-book?instrument_name=BTC_USDT&depth=10
+	url := "https://api.crypto.com/v2/public/get-book?instrument_name=" + currency + "&depth=20"
 
 	req, err := http.NewRequest("GET", url, nil)
 
@@ -31,27 +35,32 @@ func GetCryptoOrderBook(currency string, c chan []float64, w *sync.WaitGroup) {
 
 	defer res.Body.Close()
 
+	body, _ := ioutil.ReadAll(res.Body)
+
 	var cb CryptoBook
-	json.NewDecoder(res.Body).Decode(&cb)
+	json.NewDecoder(bytes.NewReader(body)).Decode(&cb)
 
-	bid_kappa, ask_kappa := getCryptoKappa(cb, 20)
+	best_bid, best_ask, bid_kappa, ask_kappa := getCryptoKappa(cb, 20)
 
-	c <- []float64{bid_kappa, ask_kappa}
+	c <- []float64{best_bid, best_ask, bid_kappa, ask_kappa}
 	w.Done()
 
 }
 
-func getCryptoKappa(cb CryptoBook, depth int) (float64, float64) {
+func getCryptoKappa(cb CryptoBook, depth int) (float64, float64, float64, float64) {
 
 	// Return This
 	var bid_kappa float64
 	var ask_kappa float64
 
-	for i := 0; i < depth; i++ {
-		bid_kappa += cb.Result.Bids[i][0] * cb.Result.Bids[i][1]
-		ask_kappa += cb.Result.Asks[i][0] * cb.Result.Asks[i][1]
+	best_bid := cb.Result.Data[0].Bids[0][0]
+	best_ask := cb.Result.Data[0].Asks[0][0]
+
+	for i := 1; i < len(cb.Result.Data[0].Bids); i++ {
+		bid_kappa += cb.Result.Data[0].Bids[i][0] * cb.Result.Data[0].Bids[i][1]
+		ask_kappa += cb.Result.Data[0].Asks[i][0] * cb.Result.Data[0].Asks[i][1]
 	}
 
-	return bid_kappa, ask_kappa
+	return best_bid, best_ask, bid_kappa, ask_kappa
 
 }

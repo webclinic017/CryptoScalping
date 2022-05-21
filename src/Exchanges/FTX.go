@@ -1,7 +1,9 @@
 package Exchanges
 
 import (
+	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"sync"
@@ -10,7 +12,13 @@ import (
 func GetFTXOrderBook(currency string, c chan []float64, w *sync.WaitGroup) {
 
 	/*
-		Method Returns the FTX Order Book
+		Input:
+		- Currency
+		- Channel
+		- Waitgroup
+
+		Output:
+		- Method Returns the FTX Order Book
 	*/
 
 	url := "https://ftx.us/api/markets/" + currency + "/orderbook?depth=20"
@@ -31,8 +39,10 @@ func GetFTXOrderBook(currency string, c chan []float64, w *sync.WaitGroup) {
 
 	defer res.Body.Close()
 
+	body, _ := ioutil.ReadAll(res.Body)
+
 	var fb FTXBook
-	json.NewDecoder(res.Body).Decode(&fb)
+	json.NewDecoder(bytes.NewReader(body)).Decode(&fb)
 
 	best_bid, best_ask, bid_kappa, ask_kappa := getFTXKappa(fb, 20)
 
@@ -59,5 +69,73 @@ func getFTXKappa(fb FTXBook, depth int) (float64, float64, float64, float64) {
 	// fmt.Println("Bid: ", bid_kappa, "Ask: ", ask_kappa)
 
 	return best_bid, best_ask, bid_kappa, ask_kappa
+
+}
+
+func GetFTXRecentTrades(currency string, c chan FTXTrades, w *sync.WaitGroup) {
+
+	/*
+		Method Returns the most recent trades on FTX Book
+	*/
+
+	url := "https://ftx.us/api/markets/" + currency + "/trades"
+
+	req, err := http.NewRequest("GET", url, nil)
+
+	if err != nil {
+		log.Println("Error Fetching FTX Recent Trades")
+	}
+
+	req.Header.Add("Accept", "application/json")
+
+	res, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		log.Println("Error Fetching FTX Recent Trades")
+	}
+
+	defer res.Body.Close()
+
+	body, _ := ioutil.ReadAll(res.Body)
+
+	var ft FTXTrades
+	json.NewDecoder(bytes.NewReader(body)).Decode(&ft)
+
+	c <- ft
+	w.Done()
+
+}
+
+func GetFTXOHLC(currency string, c chan FTXOHLC, w *sync.WaitGroup, resolution string) {
+
+	/*
+		Method Returns the OHLC from FTX Book
+	*/
+
+	url := "https://ftx.us/api/markets/" + currency + "/candles?resolution=" + resolution
+
+	req, err := http.NewRequest("GET", url, nil)
+
+	if err != nil {
+		log.Println("Error Fetching FTX OHLC")
+	}
+
+	req.Header.Add("Accept", "application/json")
+
+	res, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		log.Println("Error Fetching FTX OHLC")
+	}
+
+	defer res.Body.Close()
+
+	body, _ := ioutil.ReadAll(res.Body)
+
+	var ft FTXOHLC
+	json.NewDecoder(bytes.NewReader(body)).Decode(&ft)
+
+	c <- ft
+	w.Done()
 
 }
